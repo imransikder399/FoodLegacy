@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>FoodLegacy — Online Food Delivery Management System</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+    :root {
+      --primary: linear-gradient(135deg, #FF5E00 0%, #FF9000 100%);
+      --primary-solid: #FF5E00;
+      --secondary: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+      --accent: #10b981;
+      --dark: #1e293b;
+      --muted: #64748b;
+      --card-bg: rgba(255, 255, 255, 0.95);
+      --glass-border: 1px solid rgba(255, 255, 255, 0.8);
+      --radius: 20px;
+      --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.03);
+      --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+    }
+
+    * {
+      box-sizing: border-box;
+      outline: none;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      margin: 0;
+      background: #f8fafc;
+      background-image:
+        radial-gradient(at 0% 0%, rgba(255, 94, 0, 0.08) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(99, 102, 241, 0.08) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.05) 0px, transparent 50%);
+      background-attachment: fixed;
+      color: var(--dark);
+      min-height: 100vh;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+
+    /* GLASS HEADER */
+    header {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      padding: 18px 32px;
+      border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    header .brand {
+      font-weight: 800;
+      font-size: 22px;
+      background: var(--primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      letter-spacing: -0.5px;
+    }
+
+    .brand-logo {
+      height: 36px;
+      width: 36px;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 6px rgba(255, 94, 0, 0.2));
+    }
+
+    nav {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    /* CARD STYLING */
+    .card {
+      background: #ffffff;
+      padding: 32px;
+      border-radius: var(--radius);
+      border: 1px solid #f1f5f9;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 5px 15px rgba(0, 0, 0, 0.02);
+      transition: all 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.08);
+      border-color: #e2e8f0;
+    }
+
+    h2,
+    h3,
+    h4 {
+      margin-top: 0;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: #0f172a;
+    }
+
+    h2 {
+      font-size: 2rem;
+      margin-bottom: 1.25rem;
+    }
+
+    h3 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    /* FORMS */
+    label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 6px;
+      margin-top: 16px;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 14px 18px;
+      border-radius: 12px;
+      border: 1px solid #cbd5e1;
+      background: #fff;
+      font-family: inherit;
+      transition: all 0.2s ease;
+      font-size: 15px;
+      color: #334155;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--primary-solid);
+      box-shadow: 0 0 0 3px rgba(255, 94, 0, 0.1);
+      outline: none;
+    }
+
+    /* BUTTONS */
+    button {
+      padding: 14px 24px;
+      border-radius: 12px;
+      border: none;
+      background: var(--primary);
+      color: white;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(255, 94, 0, 0.25);
+    }
+
+    button:hover {
+      box-shadow: 0 8px 20px rgba(255, 94, 0, 0.35);
+      transform: translateY(-2px);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    /* UTILITIES */
+    .hidden {
+      display: none !important;
+    }
+
+    .grid {
+      display: grid;
+      gap: 24px;
+    }
+
+    .grid-cols-3 {
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    }
+
+    .flex {
+      display: flex;
+      gap: 16px;
+    }
+
+    .right {
+      margin-left: auto;
+    }
+
+    .muted {
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .link {
+      color: var(--primary-solid);
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .link:hover {
+      text-decoration: underline;
+    }
+
+    /* ITEM & LIST LIST STYLES */
+    .restaurant {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      padding: 20px;
+      border-radius: var(--radius);
+      background: #fff;
+      border: 1px solid #f1f5f9;
+    }
+
+    .thumb {
+      width: 100px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .menu-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      border-radius: 14px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      transition: 0.2s;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    }
+
+    .menu-item:hover {
+      border-color: #cbd5e1;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+    }
+
+    /* CART & DRAWER */
+    #cart-drawer {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      width: 400px;
+      max-height: 85vh;
+      overflow: auto;
+      border-radius: 24px;
+      padding: 32px;
+      display: none;
+      background: #ffffff;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      z-index: 120;
+      border: 1px solid #e2e8f0;
+      animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    #floating-cart {
+      position: fixed;
+      right: 32px;
+      bottom: 32px;
+      background: var(--dark);
+      width: 72px;
+      height: 72px;
+      border-radius: 28px;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.25);
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      z-index: 110;
+      font-size: 28px;
+    }
+
+    #floating-cart:hover {
+      transform: scale(1.1) rotate(-5deg);
+      box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.35);
+    }
+
+    /* MAP & EXTRA UI */
+    #map,
+    #delivery-map {
+      width: 100%;
+      height: 340px;
+      background: #f1f5f9;
+      border-radius: var(--radius);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      border: 1px solid #e2e8f0;
+    }
+
+    .pay-logo {
+      height: 32px;
+      vertical-align: middle;
+      margin-left: 12px;
+      filter: grayscale(0%);
+      transition: 0.2s
+    }
+
+    .pay-logo:hover {
+      transform: scale(1.05);
+    }
+
+    .receipt {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      color: var(--dark);
+      padding: 32px;
+      border-radius: 16px;
+      max-width: 480px;
+      font-family: 'Courier New', monospace;
+      position: relative;
+    }
+
+    .receipt::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 8px;
+      background: repeating-linear-gradient(45deg, #10b981, #10b981 12px, #fff 12px, #fff 24px);
+      border-top-left-radius: 16px;
+      border-top-right-radius: 16px;
+    }
+
+    /* ANIMATIONS */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(100%);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    section:not(.hidden) {
+      animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* ROLE THEMES */
+    /* Admin - Trustworthy Blue/Indigo */
+    body.admin {
+      --primary: linear-gradient(135deg, #3b82f6 0%, #4f46e5 100%);
+      --primary-solid: #4f46e5;
+      background-image:
+        radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(79, 70, 229, 0.15) 0px, transparent 50%);
+    }
+
+    /* Owner - Profitable Green/Emerald */
+    body.owner {
+      --primary: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      --primary-solid: #059669;
+      background-image:
+        radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(5, 150, 105, 0.1) 0px, transparent 50%);
+    }
+
+    /* Delivery - Fast Cyan/Sky */
+    body.delivery {
+      --primary: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+      --primary-solid: #0284c7;
+      background-image:
+        radial-gradient(at 0% 0%, rgba(14, 165, 233, 0.15) 0px, transparent 50%);
+    }
+
+    /* Customer - Appetizing Orange/Red (Default) */
+    body.customer {
+      --primary: linear-gradient(135deg, #FF5E00 0%, #FF9000 100%);
+      --primary-solid: #FF5E00;
+    }
+
+    /* RESPONSIVE */
+    @media(max-width:720px) {
+      .grid-cols-3 {
+        grid-template-columns: 1fr;
+      }
+
+      .container {
+        padding: 16px;
+      }
+    }
+
+    /* CUSTOM SCROLLBAR */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    /* BACK BAR */
+    .back-bar {
+      background: #ef4444;
+      color: white;
+      padding: 10px 16px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      box-shadow: 0 4px 6px rgba(96, 2, 2, 0.2);
+      transition: 0.2s;
+      width: 100%;
+    }
+
+    .back-bar:hover {
+      background: #dc2626;
+      transform: translateY(-1px);
+    }
+  </style>
+
+
+  <!-- Leaflet CSS for satellite map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous" />
+</head>
+
+<body>
+  <header>
+    <div class="container" style="display:flex;align-items:center;gap:12px">
+      <div class="brand"><img src="images/foodlegacy-logo.png" class="brand-logo" alt="logo"> FoodLegacy</div>
+      <nav class="right" id="top-nav"></nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- --- PAGES: login, register, customer, owner, delivery, admin, order-history --- -->
+
+    <!-- LOGIN PAGE (first visible) -->
+    <section id="page-login">
+      <div style="display:flex;gap:18px;align-items:stretch;flex-wrap:wrap">
+        <div style="flex:1">
+          <div class="card">
+            <h2>Sign in to FoodLegacy</h2>
+            <form id="form-login">
+              <label>Email</label>
+              <input id="login-email" type="email" placeholder="you@demo.com" required>
+              <label>Password</label>
+              <input id="login-pass" type="password" placeholder="123" required>
+              <label>Role</label>
+              <select id="login-role">
+                <option value="customer">Customer</option>
+                <option value="owner">Restaurant Owner</option>
+                <option value="delivery">Delivery Boy</option>
+                <option value="admin">Admin</option>
+              </select>
+              <div style="display:flex;gap:8px;margin-top:12px">
+                <button type="submit">Sign In</button>
+                <button type="button" onclick="showRegister()" style="background:#eef2f6;color:#0f172a">Create
+                  account</button>
+              </div>
+            </form>
+            <p class="muted" style="margin-top:10px">Demo accounts: customer@foodapp.com/123 (customer) ·
+              owner@foodapp.com/123 (Fast Food) · owner2@foodapp.com/123 (Bengali) · rider@foodapp.com/123 (delivery) ·
+              admin@foodapp.com/123 (admin)</p>
+          </div>
+        </div>
+
+        <div style="width:420px">
+          <div class="card">
+            <h3>Why FoodLegacy?</h3>
+            <p class="muted">Modern demo showcasing: multi-role auth, owner menu management, cart & payments, delivery
+              assignment and mock live-tracking.</p>
+            <div id="map" style="margin-top:12px">Map preview (mock). Replace with Google Maps API for real tracking.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- REGISTER -->
+    <section id="page-register" class="hidden">
+      <div class="card">
+        <div class="back-bar" onclick="showLogin()">← Back to Login</div>
+        <h2>Create Account</h2>
+        <form id="form-register">
+          <label>Full name</label>
+          <input id="reg-name">
+          <label>Email</label>
+          <input id="reg-email">
+          <label>Password</label>
+          <input id="reg-pass" type="password">
+          <label>Role</label>
+          <select id="reg-role" onchange="toggleRegExtra()">
+            <option value="customer">Customer</option>
+            <option value="owner">Restaurant Owner</option>
+            <option value="delivery">Delivery Boy</option>
+          </select>
+          <div id="reg-extra-owner" class="hidden" style="margin-top:8px">
+            <label>Restaurant Name</label>
+            <input id="reg-rest-name" placeholder="e.g. My Burger Joint">
+          </div>
+          <div style="margin-top:12px"><button type="submit">Create</button></div>
+        </form>
+      </div>
+    </section>
+
+    <!-- CUSTOMER HOME (restaurants) -->
+    <section id="page-customer" class="hidden">
+      <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">
+        <h2 style="margin:0">Restaurants</h2>
+        <div class="muted">Browse & order</div>
+        <div class="right">
+          <button onclick="showReviews()"
+            style="background:white;border:1px solid #e6edf3;color:#0f172a;margin-right:4px">⭐ Reviews</button>
+          <button onclick="openCart()">Open Cart (<span id="cart-count">0</span>)</button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-3" id="list-restaurants"></div>
+    </section>
+
+    <!-- RESTAURANT MENU (customer) -->
+    <section id="page-menu" class="hidden">
+      <div class="back-bar" onclick="goCustomerHome()">← Back to Restaurants</div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+        <h3 id="menu-title" style="margin:0">Menu</h3>
+        <div class="right muted">Select payment at checkout</div>
+      </div>
+      <div id="menu-list" class="grid"></div>
+    </section>
+
+    <!-- PAYMENT & CHECKOUT (updated with receipt + logos) -->
+    <section id="page-payment" class="hidden">
+      <div class="card">
+        <div class="back-bar" onclick="cancelCheckout()">← Back to Menu (Cancel)</div>
+        <h3>Checkout</h3>
+        <div id="payment-list">
+          <label><input type="radio" name="pay" value="bkash"> bKash <img src="images/bkash.png" alt="bkash"
+              class="pay-logo"></label><br>
+          <label><input type="radio" name="pay" value="nagad"> Nagad <img src="images/nagad.png" alt="nagad"
+              class="pay-logo"></label><br>
+          <label><input type="radio" name="pay" value="visa"> Visa <img src="images/visa.png" alt="visa"
+              class="pay-logo"></label><br>
+          <label><input type="radio" name="pay" value="cod"> Cash on Delivery 🚚</label>
+        </div>
+        <div style="margin-top:12px">
+          <button id="pay-confirm-btn">Pay & Confirm</button>
+        </div>
+      </div>
+
+      <!-- NEW GREEN RECEIPT -->
+      <div id="payment-receipt-wrapper" style="display:none;margin-top:16px">
+        <div id="payment-receipt" class="receipt">
+          <h3 style="margin-top:0;margin-bottom:8px;color:#145a32">Payment Receipt</h3>
+          <p><b>Transaction ID:</b> <span id="receipt-txn-id"></span></p>
+          <p><b>Amount:</b> <span id="receipt-amount"></span></p>
+          <p><b>Date & Time:</b> <span id="receipt-datetime"></span></p>
+        </div>
+        <button id="download-receipt-btn" style="margin-top:10px">Download PDF</button>
+      </div>
+    </section>
+
+    <!-- OWNER DASHBOARD (manage menu) -->
+    <section id="page-owner" class="hidden">
+      <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">
+        <h2 style="margin:0" id="owner-dashboard-header">Owner: Manage Menu</h2>
+        <div class="right muted">Add items that customers can order</div>
+      </div>
+      <div class="card">
+        <h3>Add Food Item</h3>
+        <label>Name</label><input id="owner-item-name">
+        <label>Price</label><input id="owner-item-price" type="number">
+        <label>Image URL (optional)</label><input id="owner-item-img">
+        <div style="margin-top:8px"><button onclick="ownerAddItem()">Add Item</button></div>
+      </div>
+
+      <div style="display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap;margin-top:12px">
+        <div style="flex:1">
+          <h4>Your Items</h4>
+          <div id="owner-items-list"></div>
+        </div>
+        <div style="flex:1">
+          <h4>Customer Reviews</h4>
+          <div id="owner-reviews-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DELIVERY DASHBOARD (delivery boy) -->
+    <section id="page-delivery" class="hidden">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+        <h2 style="margin:0">Delivery Requests</h2>
+        <div class="muted">Accept to start delivery</div>
+      </div>
+      <div class="card">
+        <div id="delivery-requests">No delivery requests</div>
+      </div>
+      <div style="margin-top:12px">
+        <h4>Live location (satellite)</h4>
+        <div id="delivery-map">Loading map...</div>
+      </div>
+    </section>
+
+    <!-- ADMIN DASHBOARD -->
+    <section id="page-admin" class="hidden">
+      <h2>Admin Panel</h2>
+      <div style="margin-top:12px" class="card">
+        <h4>All Orders</h4>
+        <div id="admin-orders"></div>
+      </div>
+      <div style="margin-top:12px" class="card">
+        <h4>Pending Verifications</h4>
+        <div id="admin-pending"></div>
+      </div>
+      <div style="margin-top:12px" class="card">
+        <h4>Verified Users</h4>
+        <div id="admin-users"></div>
+      </div>
+    </section>
+
+    <!-- ORDER HISTORY (customer) -->
+    <section id="page-history" class="hidden">
+      <div class="back-bar" onclick="showCustomer()">← Back to Home</div>
+      <h2>Your Orders</h2>
+      <div id="history-list"></div>
+    </section>
+
+    <!-- REVIEWS PAGE -->
+    <section id="page-reviews" class="hidden">
+      <div class="back-bar" onclick="showCustomer()">← Back to Home</div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+        <h2 style="margin:0">Reviews</h2>
+        <div class="right" id="review-action-area"></div>
+      </div>
+
+      <!-- Write Review Form -->
+      <div id="review-form-card" class="card hidden"
+        style="margin-bottom:18px;border:1px solid #e2e8f0;background:#f8fafc">
+        <h3>Write a Review</h3>
+        <form id="form-review">
+          <label>Select Food Item</label>
+          <select id="review-item-select" required></select>
+          <label>Rating</label>
+          <select id="review-rating">
+            <option value="5">⭐⭐⭐⭐⭐ (Excellent)</option>
+            <option value="4">⭐⭐⭐⭐ (Good)</option>
+            <option value="3">⭐⭐⭐ (Average)</option>
+            <option value="2">⭐⭐ (Poor)</option>
+            <option value="1">⭐ (Terrible)</option>
+          </select>
+          <label>Comment</label>
+          <textarea id="review-text" rows="3" placeholder="Share your experience..." required></textarea>
+          <div style="margin-top:12px">
+            <button type="submit">Post Review</button>
+            <button type="button" onclick="document.getElementById('review-form-card').classList.add('hidden')"
+              style="background:#eef2f6;color:#0f172a;margin-left:8px">Cancel</button>
+          </div>
+        </form>
+      </div>
+
+      <div id="reviews-list" class="grid"></div>
+    </section>
+
+
+  </main>
+
+  <!-- CART drawer -->
+  <div id="cart-drawer" class="card">
+    <h4>Your Cart</h4>
+    <div id="cart-items"></div>
+    <div style="display:flex;justify-content:space-between;margin-top:8px">
+      <div class="muted">Total</div>
+      <div id="cart-total">৳0</div>
+    </div>
+    <div style="margin-top:12px;display:flex;gap:8px"><button onclick="checkout()">Checkout</button><button
+        onclick="closeCart()" style="background:#eef2f6;color:#0f172a">Close</button></div>
+  </div>
+  <div id="floating-cart">🛒<div
+      style="position:absolute;top:-6px;right:-6px;background:#111827;color:white;border-radius:999px;padding:4px 6px;font-size:12px"
+      id="floating-count">0</div>
+  </div>
+
+  <footer>© <span id="year"></span> FoodLegacy</footer>
+
+  <!-- external libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
+
+  <script>
+    // Simple browser-only demo storage (v4 to force refresh with new owners)
+    const STORAGE = { users: 'fd_users_v5', menus: 'fd_menus_v5', orders: 'fd_orders_v5', reviews: 'fd_reviews_v5', restaurants: 'fd_restaurants_v5' };
+
+    // seed demo users & menus
+    function seed() {
+      if (!localStorage.getItem(STORAGE.users)) {
+        const u = {
+          'customer@foodapp.com': { name: 'Demo Customer', pass: '123', role: 'customer', verified: true },
+          'owner@foodapp.com': { name: 'Fast Food Owner', pass: '123', role: 'owner', verified: true },
+          'owner2@foodapp.com': { name: 'Bengali Kitchen Owner', pass: '123', role: 'owner', verified: true },
+          'owner3@foodapp.com': { name: 'Kacchi Bhai Owner', pass: '123', role: 'owner', verified: true },
+          'owner4@foodapp.com': { name: 'Sultan Dine Owner', pass: '123', role: 'owner', verified: true },
+          'owner5@foodapp.com': { name: 'Sandra Owner', pass: '123', role: 'owner', verified: true },
+          'rider@foodapp.com': { name: 'Demo Rider', pass: '123', role: 'delivery', verified: true },
+          'admin@foodapp.com': { name: 'Demo Admin', pass: '123', role: 'admin', verified: true }
+        };
+        localStorage.setItem(STORAGE.users, JSON.stringify(u));
+      }
+      if (!localStorage.getItem(STORAGE.menus)) {
+        const m = {
+          'owner@foodapp.com': [
+            { id: 'f1', name: 'Zinger Burger', price: 250, img: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=400&q=80' },
+            { id: 'f2', name: 'Chicken Cheese Pizza', price: 450, img: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=400&q=80' },
+            { id: 'f3', name: 'Crispy Fries', price: 120, img: 'https://images.unsplash.com/photo-1573080496987-a22b704c75ca?auto=format&fit=crop&w=400&q=80' },
+            { id: 'f4', name: 'Cold Coffee', price: 100, img: 'https://images.unsplash.com/photo-1517701604599-bb29b5dd7359?auto=format&fit=crop&w=400&q=80' }
+          ],
+          'owner2@foodapp.com': [
+            { id: 'b1', name: 'Kacchi Biryani', price: 350, img: 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?auto=format&fit=crop&w=400&q=80' },
+            { id: 'b2', name: 'Beef Bhuna', price: 220, img: 'https://images.unsplash.com/photo-1603064750571-088c3eb19b6f?auto=format&fit=crop&w=400&q=80' },
+            { id: 'b3', name: 'Hilsha Fish Curry', price: 400, img: 'https://images.unsplash.com/photo-1626509683553-7313aae35af6?auto=format&fit=crop&w=400&q=80' },
+            { id: 'b4', name: 'Plain Rice', price: 50, img: 'https://images.unsplash.com/photo-1516684732162-798a0062be99?auto=format&fit=crop&w=400&q=80' }
+          ],
+          'owner3@foodapp.com': [
+            { id: 'k1', name: 'Basmati Kacchi', price: 450, img: 'https://images.unsplash.com/photo-1633945274405-b6c8069047b0?auto=format&fit=crop&w=400&q=80' },
+            { id: 'k2', name: 'Borhani', price: 80, img: 'https://images.unsplash.com/photo-1541604193435-22287d32c2c2?auto=format&fit=crop&w=400&q=80' },
+            { id: 'k3', name: 'Jali Kebab', price: 60, img: 'https://images.unsplash.com/photo-1560611588-10853b5ebd85?auto=format&fit=crop&w=400&q=80' }
+          ],
+          'owner4@foodapp.com': [
+            { id: 's1', name: 'Tehari Platter', price: 280, img: 'https://images.unsplash.com/photo-1596797038530-2c107229654b?auto=format&fit=crop&w=400&q=80' },
+            { id: 's2', name: 'Chicken Roast', price: 150, img: 'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=400&q=80' },
+            { id: 's3', name: 'Firni', price: 70, img: 'https://images.unsplash.com/photo-1522221297801-7fa34a66a345?auto=format&fit=crop&w=400&q=80' }
+          ],
+          'owner5@foodapp.com': [
+            { id: 'sa1', name: 'Grilled Chicken', price: 300, img: 'https://images.unsplash.com/photo-1532550907401-a500c9a57435?auto=format&fit=crop&w=400&q=80' },
+            { id: 'sa2', name: 'Pasta Basta', price: 250, img: 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=400&q=80' },
+            { id: 'sa3', name: 'Club Sandwich', price: 180, img: 'https://images.unsplash.com/photo-1528605105345-5344ea20e269?auto=format&fit=crop&w=400&q=80' }
+          ]
+        };
+        localStorage.setItem(STORAGE.menus, JSON.stringify(m));
+      }
+      if (!localStorage.getItem(STORAGE.orders)) localStorage.setItem(STORAGE.orders, JSON.stringify([]));
+      if (!localStorage.getItem(STORAGE.reviews)) {
+        const r = [
+          { id: 'r1', user: 'Demo Customer', item: 'Kacchi Biryani', rating: 5, text: 'Authentic taste!', date: Date.now() },
+          { id: 'r2', user: 'Foodie Fan', item: 'Zinger Burger', rating: 4, text: 'Crispy and juicy.', date: Date.now() - 86400000 }
+        ];
+        localStorage.setItem(STORAGE.reviews, JSON.stringify(r));
+      }
+      if (!localStorage.getItem(STORAGE.restaurants)) {
+        const r = [
+          { id: 'r1', name: 'Fast Food House', desc: 'Burgers, Pizza & Coffee', owner: 'owner@foodapp.com' },
+          { id: 'r2', name: 'Bengali Kitchen', desc: 'Biryani, Curry & Rice', owner: 'owner2@foodapp.com' },
+          { id: 'r3', name: 'Kacchi Bhai', desc: 'Traditional Kacchi & Kebabs', owner: 'owner3@foodapp.com' },
+          { id: 'r4', name: 'Sultan\'s Dine', desc: 'Tehari & Roast Specialists', owner: 'owner4@foodapp.com' },
+          { id: 'r5', name: 'Sandra', desc: 'Continental & Fine Dining', owner: 'owner5@foodapp.com' }
+        ];
+        localStorage.setItem(STORAGE.restaurants, JSON.stringify(r));
+      }
+    }
+
+    seed();
+
+    function getRestaurants() { return JSON.parse(localStorage.getItem(STORAGE.restaurants) || '[]'); }
+
+    // app state
+    let currentUser = null; // {email,role,name}
+    let currentRestaurant = { owner: 'owner@foodapp.com', id: 'demo_rest' };
+
+    // NAV
+    function updateTopNav() {
+      const nav = document.getElementById('top-nav'); nav.innerHTML = '';
+      if (!currentUser) {
+        nav.innerHTML = '<a class="link" onclick="showLogin()">Sign in</a>';
+      } else {
+        nav.innerHTML = `<span class="muted">${currentUser.name} (${currentUser.role})</span> <a class="link" onclick="logout()">Sign out</a>`;
+      }
+    }
+
+    // show pages
+    function hideAll() { document.querySelectorAll('main section').forEach(s => s.classList.add('hidden')); document.getElementById('cart-drawer').style.display = 'none'; }
+    function showLogin() { hideAll(); document.getElementById('page-login').classList.remove('hidden'); }
+    function showRegister() { hideAll(); document.getElementById('page-register').classList.remove('hidden'); }
+    function showCustomer() { hideAll(); document.getElementById('page-customer').classList.remove('hidden'); renderRestaurants(); }
+    function showMenu() { hideAll(); document.getElementById('page-menu').classList.remove('hidden'); }
+    function showOwner() {
+      hideAll();
+      document.getElementById('page-owner').classList.remove('hidden');
+      const rs = getRestaurants();
+      const r = rs.find(x => x.owner === currentUser.email);
+      const name = r ? r.name : 'Restaurant';
+      const header = document.getElementById('owner-dashboard-header');
+      if (header) header.innerText = name;
+      renderOwnerItems();
+      renderOwnerReviews();
+    }
+    function showDelivery() { hideAll(); document.getElementById('page-delivery').classList.remove('hidden'); renderDeliveryRequests(); }
+    function showAdmin() { hideAll(); document.getElementById('page-admin').classList.remove('hidden'); renderAdmin(); }
+    function showHistory() { hideAll(); document.getElementById('page-history').classList.remove('hidden'); renderHistory(); }
+    function showReviews() { hideAll(); document.getElementById('page-reviews').classList.remove('hidden'); renderReviews(); }
+
+    // login/register
+    document.getElementById('form-login').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value.trim();
+      const pass = document.getElementById('login-pass').value.trim();
+      const role = document.getElementById('login-role').value;
+      const users = JSON.parse(localStorage.getItem(STORAGE.users) || '{}');
+
+      if (users[email] && users[email].pass === pass && users[email].role === role) {
+        if (users[email].verified === false) {
+          alert('Account pending admin approval. Please wait for verification.');
+          return;
+        }
+        currentUser = { email, role, name: users[email].name };
+        afterLogin();
+      } else {
+        alert('Invalid credentials or role');
+      }
+    });
+
+    function toggleRegExtra() {
+      const role = document.getElementById('reg-role').value;
+      const extra = document.getElementById('reg-extra-owner');
+      if (role === 'owner') extra.classList.remove('hidden'); else extra.classList.add('hidden');
+    }
+
+    document.getElementById('form-register').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const name = document.getElementById('reg-name').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const pass = document.getElementById('reg-pass').value.trim();
+      const role = document.getElementById('reg-role').value;
+      const restName = document.getElementById('reg-rest-name').value.trim();
+      const users = JSON.parse(localStorage.getItem(STORAGE.users) || '{}');
+
+      if (users[email]) { alert('User exists'); return }
+      if (role === 'owner' && !restName) { alert('Please enter Restaurant Name'); return }
+
+      // REGISTER AS UNVERIFIED
+      users[email] = { name, pass, role, verified: false };
+      localStorage.setItem(STORAGE.users, JSON.stringify(users));
+
+      // IF OWNER, create restaurant placeholder
+      if (role === 'owner') {
+        const rs = getRestaurants();
+        rs.push({ id: 'r_' + Date.now(), name: restName, desc: 'New Restaurant', owner: email });
+        localStorage.setItem(STORAGE.restaurants, JSON.stringify(rs));
+      }
+
+      alert('Registration successful! Please wait for admin approval.');
+      showLogin();
+    });
+
+    function afterLogin() {
+      updateTopNav();
+      // Apply Role Theme
+      document.body.className = currentUser.role;
+
+      if (currentUser.role === 'customer') { showCustomer(); }
+      else if (currentUser.role === 'owner') { showOwner(); }
+      else if (currentUser.role === 'delivery') { showDelivery(); }
+      else if (currentUser.role === 'admin') { showAdmin(); }
+    }
+
+    function logout() {
+      currentUser = null;
+      document.body.className = ''; // reset theme
+      updateTopNav();
+      showLogin();
+    }
+
+    // Restaurants - cached from local storage now
+    function renderRestaurants() { const el = document.getElementById('list-restaurants'); el.innerHTML = ''; const rs = getRestaurants(); rs.forEach(r => { const d = document.createElement('div'); d.className = 'restaurant card'; d.innerHTML = `<div style="flex:1"><strong>${r.name}</strong><div class="muted">${r.desc}</div></div><div><button onclick="openR('${r.owner}','${r.id}')">View</button></div>`; el.appendChild(d); }); }
+
+    // when open restaurant menu (customer)
+    function openR(ownerId, restId) {
+      currentRestaurant = { owner: ownerId, id: restId }; // load owner menu
+      const rs = getRestaurants();
+      const rName = rs.find(r => r.id === restId)?.name || 'Restaurant'; // Get name
+      const menus = JSON.parse(localStorage.getItem(STORAGE.menus) || '{}');
+      const items = menus[ownerId] || [];
+      const list = document.getElementById('menu-list');
+      list.innerHTML = '';
+      items.forEach(it => {
+        const node = document.createElement('div');
+        node.className = 'menu-item';
+        node.innerHTML = `
+          <div style='display:flex;gap:12px;align-items:center'>
+            <img src='${it.img || "https://via.placeholder.com/88"}' class='thumb'>
+            <div class='menu-meta'>
+              <div><strong>${it.name}</strong></div>
+              <div style="font-size:11px;color:#d97706;margin-bottom:2px">🏠 ${rName}</div>
+              <div class='muted'>৳ ${it.price}</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <label>Qty <input type='number' min='1' value='1' style='width:64px;padding:6px;border-radius:6px;border:1px solid #e6edf3' id='qty_${it.id}'></label>
+            <div><button onclick='cartAddWithQty("${it.id}")'>Add</button></div>
+          </div>`;
+        list.appendChild(node);
+      });
+      document.getElementById('menu-title').innerText = rName;
+      showMenu();
+    }
+
+    // owner add items
+    function ownerAddItem() { const name = document.getElementById('owner-item-name').value.trim(); const price = parseFloat(document.getElementById('owner-item-price').value); const img = document.getElementById('owner-item-img').value.trim(); if (!name || !price) { alert('Provide name & price'); return } const menus = JSON.parse(localStorage.getItem(STORAGE.menus) || '{}'); const ownerKey = currentUser ? currentUser.email : 'owner@foodapp.com'; menus[ownerKey] = menus[ownerKey] || []; const id = 'i_' + Date.now(); menus[ownerKey].push({ id, name, price, img }); localStorage.setItem(STORAGE.menus, JSON.stringify(menus)); renderOwnerItems(); alert('Item added'); }
+    function renderOwnerItems() { const ownerKey = currentUser ? currentUser.email : 'owner@foodapp.com'; const menus = JSON.parse(localStorage.getItem(STORAGE.menus) || '{}'); const items = menus[ownerKey] || []; const el = document.getElementById('owner-items-list'); el.innerHTML = ''; items.forEach(it => { const row = document.createElement('div'); row.className = 'menu-item'; row.innerHTML = `<div><strong>${it.name}</strong><div class='muted'>৳ ${it.price}</div></div><div><button onclick='ownerDelete("${ownerKey}","${it.id}")' style='background:#fee2e2;color:#9b1c1c'>Delete</button></div>`; el.appendChild(row); }); }
+    function ownerDelete(ownerKey, itemId) { const menus = JSON.parse(localStorage.getItem(STORAGE.menus) || '{}'); menus[ownerKey] = menus[ownerKey].filter(x => x.id !== itemId); localStorage.setItem(STORAGE.menus, JSON.stringify(menus)); renderOwnerItems(); }
+
+    function renderOwnerReviews() {
+      const ownerKey = currentUser ? currentUser.email : 'owner@foodapp.com';
+      const menus = JSON.parse(localStorage.getItem(STORAGE.menus) || '{}');
+      const myItems = menus[ownerKey] || [];
+      const myItemNames = myItems.map(i => i.name);
+
+      const reviews = JSON.parse(localStorage.getItem(STORAGE.reviews) || '[]');
+      const myReviews = reviews.filter(r => myItemNames.includes(r.item));
+
+      const el = document.getElementById('owner-reviews-list');
+      el.innerHTML = '';
+      if (myReviews.length === 0) { el.innerHTML = '<div class="muted">No reviews for your items yet.</div>'; return }
+
+      myReviews.sort((a, b) => b.date - a.date).forEach(r => {
+        let stars = ''; for (let i = 0; i < 5; i++) stars += i < r.rating ? '★' : '☆';
+        const d = document.createElement('div');
+        d.className = 'card';
+        d.style.marginBottom = '8px';
+        d.innerHTML = `
+           <div style="font-size:14px"><strong>${r.item}</strong> <span style="color:#f59e0b">${stars}</span></div>
+           <p style="margin:4px 0;font-style:italic">"${r.text}"</p>
+           <div class="muted" style="font-size:11px">- ${r.user}, ${new Date(r.date).toLocaleDateString()}</div>
+        `;
+        el.appendChild(d);
+      });
+    }
+
+    // CART functions (updated to support quantity)
+    let CART = JSON.parse(localStorage.getItem('fd_cart') || '[]');
+    function cartAddWithQty(itemId) {
+      // find item data from current restaurant menus
+      const menus = JSON.parse(localStorage.getItem(STORAGE.menus) || '{}');
+      const items = menus[currentRestaurant.owner] || [];
+      const it = items.find(x => x.id === itemId);
+      if (!it) { alert('Item not found'); return }
+      const qtyInput = document.getElementById('qty_' + itemId);
+      const qty = Math.max(1, parseInt(qtyInput ? qtyInput.value : 1) || 1);
+      // push to cart with qty
+      CART.push({ id: it.id, name: it.name, price: it.price, qty: qty });
+      localStorage.setItem('fd_cart', JSON.stringify(CART)); updateCartUI(); alert(it.name + ' x' + qty + ' added');
+    }
+
+    function updateCartUI() { document.getElementById('cart-items').innerHTML = ''; let total = 0; CART.forEach((c, idx) => { const row = document.createElement('div'); row.style.display = 'flex'; row.style.justifyContent = 'space-between'; row.style.marginBottom = '6px'; const lineLeft = document.createElement('div'); lineLeft.innerHTML = `<div><strong>${c.name}</strong> <div class='muted' style='font-size:12px'>Qty: ${c.qty}</div></div>`; const lineRight = document.createElement('div'); const lineTotal = c.price * (c.qty || 1); lineRight.innerHTML = `৳ ${lineTotal} <button onclick='cartRemove(${idx})' style='margin-left:8px;background:#fee2e2;color:#9b1c1c;border:none;padding:6px;border-radius:6px'>Remove</button>`; row.appendChild(lineLeft); row.appendChild(lineRight); document.getElementById('cart-items').appendChild(row); total += lineTotal; }); document.getElementById('cart-total').innerText = '৳ ' + total; document.getElementById('floating-count').innerText = CART.length; document.getElementById('cart-count').innerText = CART.length; }
+
+    function cartRemove(i) { CART.splice(i, 1); localStorage.setItem('fd_cart', JSON.stringify(CART)); updateCartUI(); }
+    function openCart() { document.getElementById('cart-drawer').style.display = 'block'; }
+    function closeCart() { document.getElementById('cart-drawer').style.display = 'none'; }
+
+    // Checkout -> show payment
+    function checkout() { if (!currentUser || currentUser.role !== 'customer') { alert('Please login as customer to checkout'); return } if (CART.length === 0) { alert('Cart empty'); return } hideAll(); document.getElementById('page-payment').classList.remove('hidden'); }
+    function cancelCheckout() { CART = JSON.parse(localStorage.getItem('fd_cart') || '[]'); showCustomer(); }
+
+    // Place order: create order, push to orders list, clear cart (enhanced to show receipt)
+    function placeOrder() { // original placeOrder preserved for compatibility
+      const pay = document.querySelector('input[name="pay"]:checked')?.value || 'cod';
+      const orders = JSON.parse(localStorage.getItem(STORAGE.orders) || '[]');
+      const order = { id: 'ord_' + Date.now(), customer: currentUser.email, items: CART.slice(), payment: pay, status: 'pending', created: Date.now() };
+      orders.push(order);
+      localStorage.setItem(STORAGE.orders, JSON.stringify(orders));
+      CART = [];
+      localStorage.setItem('fd_cart', '[]');
+      updateCartUI();
+      alert('Order placed — waiting for delivery acceptance');
+      showCustomer();
+    }
+
+    // Enhanced place order (used by Pay & Confirm button) — generates receipt
+    function placeOrderEnhanced() {
+      const pay = document.querySelector('input[name="pay"]:checked')?.value || 'cod';
+      const total = CART.reduce((s, it) => s + (it.price * (it.qty || 1)), 0);
+
+      // create order record
+      const orders = JSON.parse(localStorage.getItem(STORAGE.orders) || '[]');
+      const order = { id: 'ord_' + Date.now(), customer: currentUser.email, items: CART.slice(), payment: pay, status: 'pending', created: Date.now() };
+      orders.push(order);
+      localStorage.setItem(STORAGE.orders, JSON.stringify(orders));
+
+      // clear cart
+      CART = [];
+      localStorage.setItem('fd_cart', '[]');
+      updateCartUI();
+
+      if (pay === 'cod') {
+        alert('Cash on delivery');
+        document.getElementById('payment-receipt-wrapper').style.display = 'none';
+        showCustomer();
+      } else {
+        // generate receipt
+        const txn = 'TXN-' + Date.now() + '-' + Math.floor(Math.random() * 9000);
+        const now = new Date().toLocaleString();
+        document.getElementById('receipt-txn-id').innerText = txn;
+        document.getElementById('receipt-amount').innerText = total + ' BDT';
+        document.getElementById('receipt-datetime').innerText = now;
+        document.getElementById('payment-receipt-wrapper').style.display = 'block';
+
+        alert('Payment successful — receipt generated');
+      }
+    }
+
+    // DELIVERY: delivery dashboard sees pending orders count & can accept
+    function renderDeliveryRequests() { const orders = JSON.parse(localStorage.getItem(STORAGE.orders) || '[]'); const pending = orders.filter(o => o.status === 'pending'); const el = document.getElementById('delivery-requests'); if (pending.length === 0) { el.innerHTML = '<div class="muted">No delivery requests</div>'; document.getElementById('delivery-map').innerText = 'No assigned order'; return } el.innerHTML = ''; pending.forEach(o => { const node = document.createElement('div'); node.className = 'card'; node.style.marginBottom = '8px'; node.innerHTML = `<div><strong>Order ${o.id}</strong> • ${o.items.length} items • <span class='muted'>${new Date(o.created).toLocaleString()}</span></div><div style='margin-top:8px'><button onclick='acceptDelivery("${o.id}")'>Accept</button></div>`; el.appendChild(node); }); }
+
+    function acceptDelivery(orderId) {
+      const orders = JSON.parse(localStorage.getItem(STORAGE.orders) || '[]'); const idx = orders.findIndex(o => o.id === orderId); if (idx === -1) return; orders[idx].status = 'accepted'; orders[idx].driver = { id: 'DB' + (Math.floor(Math.random() * 900) + 100), name: currentUser ? currentUser.name : 'Demo Rider' }; localStorage.setItem(STORAGE.orders, JSON.stringify(orders)); renderDeliveryRequests(); // show live mock
+      simulateLiveDelivery(orderId); alert('You accepted order ' + orderId);
+    }
+
+    // simulate live delivery: animate a dot on map and update order status
+    function simulateLiveDelivery(orderId) {
+      // If leaflet map present, animate marker for this order
+      if (window.deliveryMap && window.deliveryMarker) {
+        let i = 0;
+        const t = setInterval(() => {
+          // small random move
+          const latlng = window.deliveryMarker.getLatLng();
+          const newLat = latlng.lat + (Math.random() - 0.5) * 0.005;
+          const newLng = latlng.lng + (Math.random() - 0.5) * 0.005;
+          window.deliveryMarker.setLatLng([newLat, newLng]);
+          window.deliveryMap.panTo([newLat, newLng]);
+          i++;
+          if (i > 12) {
+            clearInterval(t);
+            // mark order delivered
+            const orders = JSON.parse(localStorage.getItem(STORAGE.orders) || '[]'); const o = orders.find(x => x.id === orderId); if (o) { o.status = 'delivered'; localStorage.setItem(STORAGE.orders, JSON.stringify(orders)); alert('Order ' + orderId + ' delivered'); }
+            renderDeliveryRequests(); renderHistory();
+          }
+        }, 1500);
+      } else {
+        // fallback text simulation
+        const el = document.getElementById('delivery-map'); el.innerHTML = ''; const path = ['Mirpur', 'Farmgate', 'Gulshan', 'Banani', 'Customer Address']; let i = 0; el.innerText = path[i]; const timer = setInterval(() => { i++; if (i >= path.length) { clearInterval(timer); const orders = JSON.parse(localStorage.getItem(STORAGE.orders) || '[]'); const o = orders.find(x => x.id === orderId); if (o) { o.status = 'delivered'; localStorage.setItem(STORAGE.orders, JSON.stringify(orders)); alert('Order ' + orderId + ' delivered'); } renderDeliveryRequests(); renderHistory(); return; } el.innerText = 'Live: ' + path[i]; }, 2000);
+      }
+    }
+
+    // REVIEWS
+    function renderReviews() {
+      const reviews = JSON.parse(localStorage.getItem(STORAGE.reviews) || '[]');
+      const list = document.getElementById('reviews-list');
+      const actionArea = document.getElementById('review-action-area');
+
+      // Update action button
+      if (currentUser && currentUser.role === 'customer') {
+        actionArea.innerHTML = `<button onclick="toggleReviewForm()">+ Write a Review</button>`;
+        populateReviewItemSelect();
+      } else {
+        actionArea.innerHTML = '';
+      }
+
+      // Render cards
+      list.innerHTML = '';
+      if (reviews.length === 0) { list.innerHTML = '<div class="muted">No reviews yet. Be the first!</div>'; return }
+
+      // sort newest first
+      reviews.sort((a, b) => b.date - a.date).forEach(r => {
+        const d = document.createElement('div');
+        d.className = 'card';
+        // start generator
+        let stars = ''; for (let i = 0; i < 5; i++) stars += i < r.rating ? '★' : '☆';
+        d.innerHTML = `
+          <div style="display:flex;justify-content:space-between">
+            <strong>${r.item}</strong>
+            <span style="color:#f59e0b">${stars}</span>
+          </div>
+          <p style="margin:8px 0;color:#334155">${r.text}</p>
+          <div class="muted" style="font-size:12px">by ${r.user} • ${new Date(r.date).toLocaleDateString()}</div>
+        `;
+        list.appendChild(d);
+      });
+    }
+
+    function toggleReviewForm() {
+      const f = document.getElementById('review-form-card');
+      f.classList.toggle('hidden');
+    }
+
+    function populateReviewItemSelect() {
+      const sel = document.getElementById('review-item-select');
+      sel.innerHTML = '';
+      // get all items from all menus
+      const menus = JSON.parse(localStorage.getItem(STORAGE.menus) || '{}');
+      let allItems = [];
+      Object.values(menus).forEach(list => allItems = allItems.concat(list));
+
+      if (allItems.length === 0) { sel.innerHTML = '<option>No items available</option>'; return }
+
+      allItems.forEach(it => {
+        const opt = document.createElement('option');
+        opt.value = it.name; // storing name for simplicity in this flat structure
+        opt.textContent = it.name + ' (' + it.price + '৳)';
+        sel.appendChild(opt);
+      });
+    }
+
+    document.getElementById('form-review').addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (!currentUser) { alert('Login required'); return }
+
+      const item = document.getElementById('review-item-select').value;
+      const rating = parseInt(document.getElementById('review-rating').value);
+      const text = document.getElementById('review-text').value.trim();
+
+      const reviews = JSON.parse(localStorage.getItem(STORAGE.reviews) || '[]');
+      reviews.push({
+        id: 'rev_' + Date.now(),
+        user: currentUser.name,
+        item: item,
+        rating: rating,
+        text: text,
+        date: Date.now()
+      });
+      localStorage.setItem(STORAGE.reviews, JSON.stringify(reviews));
+
+      alert('Review posted!');
+      document.getElementById('form-review').reset();
+      document.getElementById('review-form-card').classList.add('hidden');
+      renderReviews();
+    });
+
+    // ADMIN
+    function renderAdmin() {
+      const orders = JSON.parse(localStorage.getItem(STORAGE.orders) || '[]');
+      const users = JSON.parse(localStorage.getItem(STORAGE.users) || '{}');
+      const ordersEl = document.getElementById('admin-orders');
+      const usersEl = document.getElementById('admin-users');
+      const pendingEl = document.getElementById('admin-pending');
+
+      ordersEl.innerHTML = '';
+      usersEl.innerHTML = '';
+      pendingEl.innerHTML = '';
+
+      // Render Orders
+      if (orders.length === 0) ordersEl.innerHTML = '<div class="muted">No orders</div>';
+      orders.forEach(o => {
+        const d = document.createElement('div');
+        d.className = 'card';
+        d.style.marginBottom = '8px';
+        d.innerHTML = `<div><strong>${o.id}</strong> • ${o.items.length} items • <span class='muted'>${o.status}</span></div>`;
+        ordersEl.appendChild(d);
+      });
+
+      // Render Users (Pending & Verified)
+      let hasPending = false;
+      let hasVerified = false;
+
+      Object.keys(users).forEach(k => {
+        const u = users[k];
+        const isPending = (u.verified === false); // explicit check
+
+        const row = document.createElement('div');
+        row.style.display = 'flex';
+        row.style.justifyContent = 'space-between';
+        row.style.alignItems = 'center';
+        row.style.padding = '8px 0';
+        row.style.borderBottom = '1px solid #f1f5f9';
+
+        if (isPending) {
+          hasPending = true;
+          row.innerHTML = `<div>${u.name} <span class="muted" style="font-size:12px">(${u.role})</span><div style="font-size:11px">${k}</div></div>
+             <div>
+               <button onclick="approveUser('${k}')" style="background:#22c55e;padding:6px 12px;font-size:12px;margin-right:4px">Approve</button>
+               <button onclick="deleteUser('${k}')" style="background:#ef4444;padding:6px 12px;font-size:12px">Delete</button>
+             </div>`;
+          pendingEl.appendChild(row);
+        } else {
+          hasVerified = true;
+          row.innerHTML = `<div>${u.name} <div class='muted' style='font-size:12px'>${k}</div></div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span>${u.role}</span>
+              <button onclick="deleteUser('${k}')" style="background:#fee2e2;color:#9b1c1c;padding:4px 8px;font-size:11px;border:none;border-radius:4px">Delete</button>
+            </div>`;
+          usersEl.appendChild(row);
+        }
+      });
+
+      if (!hasPending) pendingEl.innerHTML = '<div class="muted">No pending approvals</div>';
+      if (!hasVerified) usersEl.innerHTML = '<div class="muted">No verified users</div>';
+    }
+
+    // Approve user function
+    function approveUser(email) {
+      const users = JSON.parse(localStorage.getItem(STORAGE.users) || '{}');
+      if (users[email]) {
+        users[email].verified = true;
+        localStorage.setItem(STORAGE.users, JSON.stringify(users));
+        alert('User verified: ' + email);
+        renderAdmin();
+      }
+    }
+
+    // Delete user function
+    function deleteUser(email) {
+      if (currentUser && currentUser.email === email) {
+        alert('You cannot delete yourself!');
+        return;
+      }
+      if (!confirm('Are you sure you want to delete user ' + email + '?')) return;
+
+      const users = JSON.parse(localStorage.getItem(STORAGE.users) || '{}');
+      if (users[email]) {
+        delete users[email];
+        localStorage.setItem(STORAGE.users, JSON.stringify(users));
+        renderAdmin();
+      }
+    }
+
+    // HISTORY for customer
+    function renderHistory() { const orders = JSON.parse(localStorage.getItem(STORAGE.orders) || '[]'); const my = orders.filter(o => currentUser && o.customer === currentUser.email); const el = document.getElementById('history-list'); el.innerHTML = ''; if (my.length === 0) el.innerHTML = '<div class="muted">No previous orders</div>'; my.forEach(o => { const d = document.createElement('div'); d.className = 'card'; d.style.marginBottom = '8px'; d.innerHTML = `<div><strong>${o.id}</strong> • ${o.items.length} items • <span class='muted'>${o.status}</span></div><div style='margin-top:8px'>Payment: ${o.payment || 'N/A'}</div>`; el.appendChild(d); }); }
+
+    // helpers
+    function goCustomerHome() { showCustomer(); }
+    function openCart() { document.getElementById('cart-drawer').style.display = 'block'; }
+    function closeCart() { document.getElementById('cart-drawer').style.display = 'none'; }
+
+    // initialize
+    document.getElementById('floating-cart').addEventListener('click', () => { document.getElementById('cart-drawer').style.display = document.getElementById('cart-drawer').style.display === 'block' ? 'none' : 'block'; });
+    document.getElementById('year').textContent = new Date().getFullYear(); updateTopNav(); showLogin(); updateCartUI();
+
+    // expose some functions for buttons created in HTML
+    window.showLogin = showLogin; window.showRegister = showRegister; window.showCustomer = showCustomer; window.showOwner = showOwner; window.showDelivery = showDelivery; window.showAdmin = showAdmin; window.showHistory = showHistory; window.showReviews = showReviews; window.openR = openR; window.cartAdd = cartAddWithQty; window.openCart = openCart; window.closeCart = closeCart; window.checkout = checkout; window.placeOrder = placeOrder; window.cancelCheckout = cancelCheckout; window.ownerAddItem = ownerAddItem; window.acceptDelivery = acceptDelivery; window.renderDeliveryRequests = renderDeliveryRequests; window.renderAdmin = renderAdmin; window.renderOwnerItems = renderOwnerItems; window.renderOwnerReviews = renderOwnerReviews; window.renderHistory = renderHistory; window.renderReviews = renderReviews; window.toggleReviewForm = toggleReviewForm; window.approveUser = approveUser; window.deleteUser = deleteUser;
+
+    // wire up pay & confirm button and receipt download
+    document.getElementById('pay-confirm-btn').addEventListener('click', function () {
+      // use enhanced flow
+      if (!currentUser || currentUser.role !== 'customer') { alert('Please login as customer to pay'); return }
+      if (CART.length === 0) { alert('Cart empty'); return }
+      placeOrderEnhanced();
+    });
+
+    document.getElementById('download-receipt-btn').addEventListener('click', function () {
+      const el = document.getElementById('payment-receipt');
+      if (typeof html2pdf === 'undefined') { alert('PDF library not loaded'); return }
+
+      const txn = document.getElementById('receipt-txn-id').innerText || 'receipt';
+
+      const opt = {
+        margin: 10,
+        filename: 'FoodLegacy-Receipt-' + txn + '.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+
+      html2pdf().from(el).set(opt).save();
+    });
+
+    // initialize Leaflet satellite map for delivery page
+    (function initDeliveryMap() {
+      try {
+        const map = L.map('delivery-map').setView([23.8103, 90.4125], 14);
+        L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'] }).addTo(map);
+        const marker = L.marker([23.8103, 90.4125]).addTo(map);
+        window.deliveryMap = map; window.deliveryMarker = marker;
+      } catch (e) { console.warn('Leaflet init failed', e); document.getElementById('delivery-map').innerText = 'Map not available'; }
+    })();
+
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</body>
+
+</html>
