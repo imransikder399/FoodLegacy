@@ -65,6 +65,7 @@
       font-size: 22px;
       background: var(--primary);
       -webkit-background-clip: text;
+      background-clip: text;
       -webkit-text-fill-color: transparent;
       display: flex;
       align-items: center;
@@ -251,6 +252,71 @@
       border-color: #cbd5e1;
       transform: translateY(-2px);
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+    }
+
+    /* NOTIFICATIONS */
+    .notification-wrapper {
+      position: relative;
+      cursor: pointer;
+    }
+
+    .notification-badge {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      background: #ef4444;
+      color: white;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      font-size: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      border: 2px solid white;
+    }
+
+    #notification-drawer {
+      position: fixed;
+      right: 24px;
+      top: 80px;
+      width: 320px;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      z-index: 150;
+      display: none;
+      max-height: 70vh;
+      overflow-y: auto;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    .notif-item {
+      padding: 16px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 0.9rem;
+      transition: background 0.2s;
+    }
+
+    .notif-item:last-child {
+      border-bottom: none;
+    }
+
+    .notif-item:hover {
+      background: #f8fafc;
+    }
+
+    .notif-item.unread {
+      background: #eff6ff;
+      border-left: 3px solid #3b82f6;
+    }
+
+    .notif-time {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      margin-top: 4px;
     }
 
     /* CART & DRAWER */
@@ -557,6 +623,10 @@
         </div>
       </div>
 
+      <input type="text" id="global-search" placeholder="Search for food (e.g. 'burger')..."
+        style="width:100%;padding:14px;margin-bottom:20px;border:1px solid #cbd5e1;border-radius:12px;font-size:16px;box-shadow:0 2px 4px rgba(0,0,0,0.02)"
+        onkeyup="searchGlobal()">
+
       <div class="grid grid-cols-3" id="list-restaurants"></div>
     </section>
 
@@ -567,6 +637,9 @@
         <h3 id="menu-title" style="margin:0">Menu</h3>
         <div class="right muted">Select payment at checkout</div>
       </div>
+      <input type="text" id="menu-search" placeholder="Search for dishes..."
+        style="width:100%;padding:12px;margin-bottom:16px;border:1px solid #cbd5e1;border-radius:8px;font-size:16px"
+        onkeyup="filterMenu()">
       <div id="menu-list" class="grid"></div>
     </section>
 
@@ -583,6 +656,11 @@
           <label><input type="radio" name="pay" value="visa"> Visa <img src="images/visa.png" alt="visa"
               class="pay-logo"></label><br>
           <label><input type="radio" name="pay" value="cod"> Cash on Delivery 🚚</label>
+        </div>
+        <div style="margin-top:16px;">
+          <label style="margin-bottom:8px;display:block">Delivery Address</label>
+          <textarea id="checkout-address" rows="3" placeholder="Enter full delivery address (House, Road, Area...)"
+            style="width:100%;padding:10px;border-radius:8px;border:1px solid #cbd5e1" required></textarea>
         </div>
         <div style="margin-top:12px">
           <button id="pay-confirm-btn">Pay & Confirm</button>
@@ -611,7 +689,9 @@
         <h3>Add Food Item</h3>
         <label>Name</label><input id="owner-item-name">
         <label>Price</label><input id="owner-item-price" type="number">
-        <label>Image URL (optional)</label><input id="owner-item-img">
+        <label>Food Photo (Upload)</label><input id="owner-item-img" type="file" accept="image/*">
+        <label>Sizes (optional, e.g. "Half:150, Full:300")</label><input id="owner-item-sizes"
+          placeholder="Name:Price, Name:Price">
         <div style="margin-top:8px"><button onclick="ownerAddItem()">Add Item</button></div>
       </div>
 
@@ -716,6 +796,18 @@
     <div style="margin-top:12px;display:flex;gap:8px"><button onclick="checkout()">Checkout</button><button
         onclick="closeCart()" style="background:#eef2f6;color:#0f172a">Close</button></div>
   </div>
+
+  <!-- NOTIFICATION DRAWER -->
+  <div id="notification-drawer">
+    <div
+      style="padding:16px;border-bottom:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center;background:#f8fafc;border-top-left-radius:16px;border-top-right-radius:16px">
+      <h4 style="margin:0;font-size:16px">Notifications</h4>
+      <button onclick="document.getElementById('notification-drawer').style.display='none'"
+        style="background:transparent;border:none;font-size:20px;cursor:pointer;color:#64748b;padding:0">×</button>
+    </div>
+    <div id="notif-list"></div>
+  </div>
+
   <div id="floating-cart">🛒<div
       style="position:absolute;top:-6px;right:-6px;background:#111827;color:white;border-radius:999px;padding:4px 6px;font-size:12px"
       id="floating-count">0</div>
@@ -729,7 +821,7 @@
 
   <script>
     // Simple browser-only demo storage (v4 to force refresh with new owners)
-    const STORAGE = { users: 'fd_users_v5', menus: 'fd_menus_v5', orders: 'fd_orders_v5', reviews: 'fd_reviews_v5', restaurants: 'fd_restaurants_v5' };
+    const STORAGE = { users: 'fd_users_v6', menus: 'fd_menus_v6', orders: 'fd_orders_v6', reviews: 'fd_reviews_v6', restaurants: 'fd_restaurants_v6', notifications: 'fd_notifs_v6' };
 
     // seed demo users & menus
     function seed() {
@@ -750,12 +842,12 @@
         const m = {
           'owner@foodapp.com': [
             { id: 'f1', name: 'Zinger Burger', price: 250, img: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=400&q=80' },
-            { id: 'f2', name: 'Chicken Cheese Pizza', price: 450, img: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=400&q=80' },
+            { id: 'f2', name: 'Chicken Cheese Pizza', price: 450, img: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=400&q=80', sizes: [{ name: '8 inch', price: 450 }, { name: '12 inch', price: 750 }, { name: '16 inch', price: 1150 }] },
             { id: 'f3', name: 'Crispy Fries', price: 120, img: 'https://images.unsplash.com/photo-1573080496987-a22b704c75ca?auto=format&fit=crop&w=400&q=80' },
             { id: 'f4', name: 'Cold Coffee', price: 100, img: 'https://images.unsplash.com/photo-1517701604599-bb29b5dd7359?auto=format&fit=crop&w=400&q=80' }
           ],
           'owner2@foodapp.com': [
-            { id: 'b1', name: 'Kacchi Biryani', price: 350, img: 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?auto=format&fit=crop&w=400&q=80' },
+            { id: 'b1', name: 'Kacchi Biryani', price: 350, img: 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?auto=format&fit=crop&w=400&q=80', sizes: [{ name: 'Half', price: 200 }, { name: 'Full', price: 350 }] },
             { id: 'b2', name: 'Beef Bhuna', price: 220, img: 'https://images.unsplash.com/photo-1603064750571-088c3eb19b6f?auto=format&fit=crop&w=400&q=80' },
             { id: 'b3', name: 'Hilsha Fish Curry', price: 400, img: 'https://images.unsplash.com/photo-1626509683553-7313aae35af6?auto=format&fit=crop&w=400&q=80' },
             { id: 'b4', name: 'Plain Rice', price: 50, img: 'https://images.unsplash.com/photo-1516684732162-798a0062be99?auto=format&fit=crop&w=400&q=80' }
@@ -812,7 +904,17 @@
       if (!currentUser) {
         nav.innerHTML = '<a class="link" onclick="showLogin()">Sign in</a>';
       } else {
-        nav.innerHTML = `<span class="muted">${currentUser.name} (${currentUser.role})</span> <a class="link" onclick="logout()">Sign out</a>`;
+        nav.innerHTML = `
+          <div style="display:flex;align-items:center;gap:20px">
+             <div class="notification-wrapper" onclick="toggleNotifications()" title="Notifications">
+               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+               <div id="notif-badge" class="notification-badge" style="display:none">0</div>
+             </div>
+             <span class="muted">${currentUser.name} (${currentUser.role})</span> 
+             <a class="link" onclick="logout()">Sign out</a>
+          </div>
+        `;
+        setTimeout(updateNotificationUI, 100); // delay to ensure existing execution
       }
     }
 
@@ -873,11 +975,14 @@
       const restName = document.getElementById('reg-rest-name').value.trim();
       const users = JSON.parse(localStorage.getItem(STORAGE.users) || '{}');
 
+      if (!email.toLowerCase().endsWith('@gmail.com')) { alert('Please use a valid Gmail address (e.g. name@gmail.com)'); return }
       if (users[email]) { alert('User exists'); return }
       if (role === 'owner' && !restName) { alert('Please enter Restaurant Name'); return }
 
-      // REGISTER AS UNVERIFIED
-      users[email] = { name, pass, role, verified: false };
+      // REGISTER
+      // Customer auto-verified, others pending
+      const isVerified = (role === 'customer');
+      users[email] = { name, pass, role, verified: isVerified };
       localStorage.setItem(STORAGE.users, JSON.stringify(users));
 
       // IF OWNER, create restaurant placeholder
@@ -887,7 +992,11 @@
         localStorage.setItem(STORAGE.restaurants, JSON.stringify(rs));
       }
 
-      alert('Registration successful! Please wait for admin approval.');
+      if (isVerified) {
+        alert('Registration successful! You may now sign in.');
+      } else {
+        alert('Registration successful! Please wait for admin approval.');
+      }
       showLogin();
     });
 
@@ -924,13 +1033,24 @@
       items.forEach(it => {
         const node = document.createElement('div');
         node.className = 'menu-item';
+
+        // Handle sizes (variants)
+        let priceDisplay = it.price;
+        let sizeSelector = '';
+        if (it.sizes && it.sizes.length > 0) {
+          priceDisplay = it.sizes[0].price; // default to first size
+          const options = it.sizes.map(s => `<option value="${s.name}|${s.price}">${s.name}</option>`).join('');
+          sizeSelector = `<div style="margin-top:4px"><select id="size_${it.id}" style="padding:6px;border-radius:6px;width:100%;border:1px solid #cbd5e1" onchange="updatePriceDisplay(this, '${it.id}')">${options}</select></div>`;
+        }
+
         node.innerHTML = `
           <div style='display:flex;gap:12px;align-items:center'>
             <img src='${it.img || "https://via.placeholder.com/88"}' class='thumb'>
             <div class='menu-meta'>
               <div><strong>${it.name}</strong></div>
               <div style="font-size:11px;color:#d97706;margin-bottom:2px">🏠 ${rName}</div>
-              <div class='muted'>৳ ${it.price}</div>
+              <div class='muted'>৳ <span id='price_disp_${it.id}'>${priceDisplay}</span></div>
+              ${sizeSelector}
             </div>
           </div>
           <div style="display:flex;align-items:center;gap:8px">
@@ -940,11 +1060,62 @@
         list.appendChild(node);
       });
       document.getElementById('menu-title').innerText = rName;
+      // Reset search
+      const s = document.getElementById('menu-search'); if (s) { s.value = ''; s.dispatchEvent(new Event('keyup')); }
       showMenu();
     }
 
     // owner add items
-    function ownerAddItem() { const name = document.getElementById('owner-item-name').value.trim(); const price = parseFloat(document.getElementById('owner-item-price').value); const img = document.getElementById('owner-item-img').value.trim(); if (!name || !price) { alert('Provide name & price'); return } const menus = JSON.parse(localStorage.getItem(STORAGE.menus) || '{}'); const ownerKey = currentUser ? currentUser.email : 'owner@foodapp.com'; menus[ownerKey] = menus[ownerKey] || []; const id = 'i_' + Date.now(); menus[ownerKey].push({ id, name, price, img }); localStorage.setItem(STORAGE.menus, JSON.stringify(menus)); renderOwnerItems(); alert('Item added'); }
+    function ownerAddItem() {
+      const name = document.getElementById('owner-item-name').value.trim();
+      const price = parseFloat(document.getElementById('owner-item-price').value);
+      const fileInput = document.getElementById('owner-item-img');
+      const sizesStr = document.getElementById('owner-item-sizes').value.trim();
+
+      if (!name || (isNaN(price) && !sizesStr)) { alert('Provide name & price (or sizes)'); return }
+
+      // Helper to process add
+      const processAdd = (imgData) => {
+        let sizes = [];
+        if (sizesStr) {
+          sizes = sizesStr.split(',').map(s => {
+            const parts = s.split(':');
+            if (parts.length === 2) return { name: parts[0].trim(), price: parseFloat(parts[1]) };
+            return null;
+          }).filter(x => x);
+        }
+
+        const menus = JSON.parse(localStorage.getItem(STORAGE.menus) || '{}');
+        const ownerKey = currentUser ? currentUser.email : 'owner@foodapp.com';
+        menus[ownerKey] = menus[ownerKey] || [];
+        const id = 'i_' + Date.now();
+
+        // If sizes exist, use first size price as fallback
+        const finalPrice = sizes.length > 0 ? sizes[0].price : price;
+
+        menus[ownerKey].push({ id, name, price: finalPrice, img: imgData, sizes });
+        localStorage.setItem(STORAGE.menus, JSON.stringify(menus));
+        renderOwnerItems();
+        alert('Item added successfully!');
+
+        // clear inputs
+        document.getElementById('owner-item-name').value = '';
+        document.getElementById('owner-item-price').value = '';
+        document.getElementById('owner-item-img').value = '';
+        document.getElementById('owner-item-sizes').value = '';
+      };
+
+      // Read file if present
+      if (fileInput.files && fileInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          processAdd(e.target.result); // Base64 string
+        };
+        reader.readAsDataURL(fileInput.files[0]);
+      } else {
+        processAdd(''); // No image
+      }
+    }
     function renderOwnerItems() { const ownerKey = currentUser ? currentUser.email : 'owner@foodapp.com'; const menus = JSON.parse(localStorage.getItem(STORAGE.menus) || '{}'); const items = menus[ownerKey] || []; const el = document.getElementById('owner-items-list'); el.innerHTML = ''; items.forEach(it => { const row = document.createElement('div'); row.className = 'menu-item'; row.innerHTML = `<div><strong>${it.name}</strong><div class='muted'>৳ ${it.price}</div></div><div><button onclick='ownerDelete("${ownerKey}","${it.id}")' style='background:#fee2e2;color:#9b1c1c'>Delete</button></div>`; el.appendChild(row); }); }
     function ownerDelete(ownerKey, itemId) { const menus = JSON.parse(localStorage.getItem(STORAGE.menus) || '{}'); menus[ownerKey] = menus[ownerKey].filter(x => x.id !== itemId); localStorage.setItem(STORAGE.menus, JSON.stringify(menus)); renderOwnerItems(); }
 
@@ -977,20 +1148,88 @@
 
     // CART functions (updated to support quantity)
     let CART = JSON.parse(localStorage.getItem('fd_cart') || '[]');
+
+    // Helper to update displayed price when size changes
+    window.updatePriceDisplay = function (sel, id) {
+      if (sel && sel.value) {
+        const parts = sel.value.split('|');
+        if (parts.length > 1) {
+          document.getElementById('price_disp_' + id).innerText = parts[1];
+        }
+      }
+    };
+
     function cartAddWithQty(itemId) {
-      // find item data from current restaurant menus
       const menus = JSON.parse(localStorage.getItem(STORAGE.menus) || '{}');
       const items = menus[currentRestaurant.owner] || [];
       const it = items.find(x => x.id === itemId);
       if (!it) { alert('Item not found'); return }
+
       const qtyInput = document.getElementById('qty_' + itemId);
       const qty = Math.max(1, parseInt(qtyInput ? qtyInput.value : 1) || 1);
-      // push to cart with qty
-      CART.push({ id: it.id, name: it.name, price: it.price, qty: qty });
-      localStorage.setItem('fd_cart', JSON.stringify(CART)); updateCartUI(); alert(it.name + ' x' + qty + ' added');
+
+      let finalPrice = it.price;
+      let sizeName = null;
+
+      // Check for size selector
+      const sizeSel = document.getElementById('size_' + itemId);
+      if (sizeSel) {
+        const val = sizeSel.value;
+        const parts = val.split('|');
+        if (parts.length === 2) {
+          sizeName = parts[0];
+          finalPrice = parseFloat(parts[1]);
+        }
+      }
+
+      // Check existence
+      const existingIdx = CART.findIndex(c => c.itemId === it.id && c.size === sizeName);
+
+      if (existingIdx > -1) {
+        CART[existingIdx].qty += qty;
+      } else {
+        CART.push({
+          id: 'c_' + Date.now() + Math.random(),
+          itemId: it.id,
+          name: it.name,
+          price: finalPrice,
+          size: sizeName,
+          qty: qty
+        });
+      }
+
+      localStorage.setItem('fd_cart', JSON.stringify(CART));
+      updateCartUI();
+      alert(it.name + (sizeName ? ' (' + sizeName + ')' : '') + ' x' + qty + ' added');
     }
 
-    function updateCartUI() { document.getElementById('cart-items').innerHTML = ''; let total = 0; CART.forEach((c, idx) => { const row = document.createElement('div'); row.style.display = 'flex'; row.style.justifyContent = 'space-between'; row.style.marginBottom = '6px'; const lineLeft = document.createElement('div'); lineLeft.innerHTML = `<div><strong>${c.name}</strong> <div class='muted' style='font-size:12px'>Qty: ${c.qty}</div></div>`; const lineRight = document.createElement('div'); const lineTotal = c.price * (c.qty || 1); lineRight.innerHTML = `৳ ${lineTotal} <button onclick='cartRemove(${idx})' style='margin-left:8px;background:#fee2e2;color:#9b1c1c;border:none;padding:6px;border-radius:6px'>Remove</button>`; row.appendChild(lineLeft); row.appendChild(lineRight); document.getElementById('cart-items').appendChild(row); total += lineTotal; }); document.getElementById('cart-total').innerText = '৳ ' + total; document.getElementById('floating-count').innerText = CART.length; document.getElementById('cart-count').innerText = CART.length; }
+    function updateCartUI() {
+      document.getElementById('cart-items').innerHTML = '';
+      let total = 0;
+      CART.forEach((c, idx) => {
+        const row = document.createElement('div');
+        row.style.display = 'flex';
+        row.style.justifyContent = 'space-between';
+        row.style.marginBottom = '6px';
+
+        const sizeLabel = c.size ? `<span style="background:#e0f2fe;color:#0369a1;padding:2px 6px;border-radius:4px;font-size:10px;margin-left:4px">${c.size}</span>` : '';
+
+        const lineLeft = document.createElement('div');
+        lineLeft.innerHTML = `<div><strong>${c.name}</strong>${sizeLabel} <div class='muted' style='font-size:12px'>Qty: ${c.qty}</div></div>`;
+
+        const lineRight = document.createElement('div');
+        const lineTotal = c.price * (c.qty || 1);
+        lineRight.innerHTML = `৳ ${lineTotal} <button onclick='cartRemove(${idx})' style='margin-left:8px;background:#fee2e2;color:#9b1c1c;border:none;padding:6px;border-radius:6px'>Remove</button>`;
+
+        row.appendChild(lineLeft);
+        row.appendChild(lineRight);
+        document.getElementById('cart-items').appendChild(row);
+        total += lineTotal;
+      });
+      document.getElementById('cart-total').innerText = '৳ ' + total;
+      document.getElementById('floating-count').innerText = CART.length;
+      document.getElementById('cart-count').innerText = CART.length;
+    }
 
     function cartRemove(i) { CART.splice(i, 1); localStorage.setItem('fd_cart', JSON.stringify(CART)); updateCartUI(); }
     function openCart() { document.getElementById('cart-drawer').style.display = 'block'; }
@@ -1004,9 +1243,11 @@
     function placeOrder() { // original placeOrder preserved for compatibility
       const pay = document.querySelector('input[name="pay"]:checked')?.value || 'cod';
       const orders = JSON.parse(localStorage.getItem(STORAGE.orders) || '[]');
-      const order = { id: 'ord_' + Date.now(), customer: currentUser.email, items: CART.slice(), payment: pay, status: 'pending', created: Date.now() };
+      const newId = 'ord_' + Date.now();
+      const order = { id: newId, customer: currentUser.email, items: CART.slice(), payment: pay, status: 'pending', created: Date.now() };
       orders.push(order);
       localStorage.setItem(STORAGE.orders, JSON.stringify(orders));
+      pushNotification('delivery', `🚀 New Delivery Request! Order #${newId} is ready for pickup.`); // Notify Riders
       CART = [];
       localStorage.setItem('fd_cart', '[]');
       updateCartUI();
@@ -1017,13 +1258,23 @@
     // Enhanced place order (used by Pay & Confirm button) — generates receipt
     function placeOrderEnhanced() {
       const pay = document.querySelector('input[name="pay"]:checked')?.value || 'cod';
+      const address = document.getElementById('checkout-address').value.trim();
+
+      if (!address) {
+        alert('Please enter your Delivery Address!');
+        document.getElementById('checkout-address').focus();
+        return;
+      }
+
       const total = CART.reduce((s, it) => s + (it.price * (it.qty || 1)), 0);
 
       // create order record
       const orders = JSON.parse(localStorage.getItem(STORAGE.orders) || '[]');
-      const order = { id: 'ord_' + Date.now(), customer: currentUser.email, items: CART.slice(), payment: pay, status: 'pending', created: Date.now() };
+      const newId = 'ord_' + Date.now();
+      const order = { id: newId, customer: currentUser.email, items: CART.slice(), payment: pay, address: address, status: 'pending', created: Date.now() };
       orders.push(order);
       localStorage.setItem(STORAGE.orders, JSON.stringify(orders));
+      pushNotification('delivery', `🚀 New Delivery Request! Order #${newId} is ready for pickup.`); // Notify Riders
 
       // clear cart
       CART = [];
@@ -1031,7 +1282,7 @@
       updateCartUI();
 
       if (pay === 'cod') {
-        alert('Cash on delivery');
+        alert('Order Placed Successfully! (Cash on Delivery)');
         document.getElementById('payment-receipt-wrapper').style.display = 'none';
         showCustomer();
       } else {
@@ -1045,6 +1296,8 @@
 
         alert('Payment successful — receipt generated');
       }
+      // Reset address field
+      document.getElementById('checkout-address').value = '';
     }
 
     // DELIVERY: delivery dashboard sees pending orders count & can accept
@@ -1071,13 +1324,14 @@
           if (i > 12) {
             clearInterval(t);
             // mark order delivered
-            const orders = JSON.parse(localStorage.getItem(STORAGE.orders) || '[]'); const o = orders.find(x => x.id === orderId); if (o) { o.status = 'delivered'; localStorage.setItem(STORAGE.orders, JSON.stringify(orders)); alert('Order ' + orderId + ' delivered'); }
+            // mark order delivered
+            const orders = JSON.parse(localStorage.getItem(STORAGE.orders) || '[]'); const o = orders.find(x => x.id === orderId); if (o) { o.status = 'delivered'; localStorage.setItem(STORAGE.orders, JSON.stringify(orders)); alert('Order ' + orderId + ' delivered'); pushNotification(o.customer, `✅ Your food has arrived! Order #${orderId} is delivered. Enjoy! 🍔`); }
             renderDeliveryRequests(); renderHistory();
           }
         }, 1500);
       } else {
         // fallback text simulation
-        const el = document.getElementById('delivery-map'); el.innerHTML = ''; const path = ['Mirpur', 'Farmgate', 'Gulshan', 'Banani', 'Customer Address']; let i = 0; el.innerText = path[i]; const timer = setInterval(() => { i++; if (i >= path.length) { clearInterval(timer); const orders = JSON.parse(localStorage.getItem(STORAGE.orders) || '[]'); const o = orders.find(x => x.id === orderId); if (o) { o.status = 'delivered'; localStorage.setItem(STORAGE.orders, JSON.stringify(orders)); alert('Order ' + orderId + ' delivered'); } renderDeliveryRequests(); renderHistory(); return; } el.innerText = 'Live: ' + path[i]; }, 2000);
+        const el = document.getElementById('delivery-map'); el.innerHTML = ''; const path = ['Mirpur', 'Farmgate', 'Gulshan', 'Banani', 'Customer Address']; let i = 0; el.innerText = path[i]; const timer = setInterval(() => { i++; if (i >= path.length) { clearInterval(timer); const orders = JSON.parse(localStorage.getItem(STORAGE.orders) || '[]'); const o = orders.find(x => x.id === orderId); if (o) { o.status = 'delivered'; localStorage.setItem(STORAGE.orders, JSON.stringify(orders)); alert('Order ' + orderId + ' delivered'); pushNotification(o.customer, `✅ Your food has arrived! Order #${orderId} is delivered. Enjoy! 🍔`); } renderDeliveryRequests(); renderHistory(); return; } el.innerText = 'Live: ' + path[i]; }, 2000);
       }
     }
 
@@ -1253,10 +1507,133 @@
     }
 
     // HISTORY for customer
-    function renderHistory() { const orders = JSON.parse(localStorage.getItem(STORAGE.orders) || '[]'); const my = orders.filter(o => currentUser && o.customer === currentUser.email); const el = document.getElementById('history-list'); el.innerHTML = ''; if (my.length === 0) el.innerHTML = '<div class="muted">No previous orders</div>'; my.forEach(o => { const d = document.createElement('div'); d.className = 'card'; d.style.marginBottom = '8px'; d.innerHTML = `<div><strong>${o.id}</strong> • ${o.items.length} items • <span class='muted'>${o.status}</span></div><div style='margin-top:8px'>Payment: ${o.payment || 'N/A'}</div>`; el.appendChild(d); }); }
+    function renderHistory() { const orders = JSON.parse(localStorage.getItem(STORAGE.orders) || '[]'); const my = orders.filter(o => currentUser && o.customer === currentUser.email); const el = document.getElementById('history-list'); el.innerHTML = ''; if (my.length === 0) el.innerHTML = '<div class="muted">No previous orders</div>'; my.forEach(o => { const d = document.createElement('div'); d.className = 'card'; d.style.marginBottom = '8px'; d.innerHTML = `<div><strong>${o.id}</strong> • ${o.items.length} items • <span class='muted'>${o.status}</span></div><div style='margin-top:4px'>📍 ${o.address || 'No address provided'}</div><div style='margin-top:4px'>Payment: ${o.payment || 'N/A'}</div>`; el.appendChild(d); }); }
 
     // helpers
     function goCustomerHome() { showCustomer(); }
+
+    // FILTER MENU (Restaurant specific)
+    function filterMenu() {
+      const input = document.getElementById('menu-search');
+      if (!input) return;
+      const filter = input.value.toLowerCase();
+      const list = document.getElementById('menu-list');
+      const items = list.getElementsByClassName('menu-item');
+
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        const nameEl = item.querySelector('strong');
+        if (nameEl) {
+          const txt = nameEl.innerText || nameEl.textContent;
+          if (txt.toLowerCase().indexOf(filter) > -1) {
+            item.style.display = "";
+          } else {
+            item.style.display = "none";
+          }
+        }
+      }
+    }
+
+    // GLOBAL SEARCH (All Restaurants)
+    function searchGlobal() {
+      const query = document.getElementById('global-search').value.toLowerCase().trim();
+      const container = document.getElementById('list-restaurants'); // hijacking this container
+
+      if (!query) {
+        renderRestaurants(); // restore restaurants
+        return;
+      }
+
+      const menus = JSON.parse(localStorage.getItem(STORAGE.menus) || '{}');
+      const restaurants = getRestaurants();
+
+      // Flatten all items with owner info
+      let allItems = [];
+      Object.keys(menus).forEach(ownerEmail => {
+        const r = restaurants.find(x => x.owner === ownerEmail);
+        const rName = r ? r.name : 'Unknown';
+        menus[ownerEmail].forEach(item => {
+          // attach owner info to item clone
+          allItems.push({ ...item, ownerEmail, rName });
+        });
+      });
+
+      const matches = allItems.filter(it => it.name.toLowerCase().includes(query));
+
+      container.innerHTML = '';
+      if (matches.length === 0) {
+        container.innerHTML = '<div class="muted" style="grid-column:1/-1;text-align:center;padding:20px">No food found matching "' + query + '"</div>';
+        return;
+      }
+
+      matches.forEach(it => {
+        const node = document.createElement('div');
+        node.className = 'menu-item'; // reuse styling
+        node.style.background = '#fff';
+        node.style.flexDirection = 'column'; // stack for grid
+        node.style.alignItems = 'flex-start';
+        node.style.gap = '8px';
+
+        // Handle sizes for display (simplified for global search, just show base price or range)
+        let priceDisplay = it.price;
+        if (it.sizes && it.sizes.length > 0) priceDisplay = it.sizes[0].price + '+';
+
+        node.innerHTML = `
+          <div style='display:flex;gap:12px;align-items:center;width:100%'>
+            <img src='${it.img || "https://via.placeholder.com/88"}' class='thumb'>
+            <div class='menu-meta' style='flex:1'>
+              <div style="font-size:16px"><strong>${it.name}</strong></div>
+              <div style="font-size:12px;color:#d97706;margin-bottom:4px">🏠 ${it.rName}</div>
+              <div class='muted'>Starting at ৳ ${priceDisplay}</div>
+            </div>
+          </div>
+          <div style="width:100%;margin-top:8px">
+             <button onclick='cartAddGlobal("${it.ownerEmail}","${it.id}")' style="width:100%">Add to Cart</button>
+          </div>`;
+        container.appendChild(node);
+      });
+    }
+
+    function cartAddGlobal(ownerId, itemId) {
+      // Temporarily set context just for this add, or refactor cartAddWithQty
+      // We will duplicate logic slightly for safety, or we can assume simple add (no size selection in global search for simplicity, effectively adding default)
+
+      // Constraint: Global search adds default size. User should visit restaurant for options? 
+      // For now, let's just add the item.
+
+      const menus = JSON.parse(localStorage.getItem(STORAGE.menus) || '{}');
+      const items = menus[ownerId] || [];
+      const it = items.find(x => x.id === itemId);
+
+      if (!it) return;
+
+      // Default to first size if exists
+      let finalPrice = it.price;
+      let sizeName = null;
+      if (it.sizes && it.sizes.length > 0) {
+        sizeName = it.sizes[0].name;
+        finalPrice = it.sizes[0].price;
+      }
+
+      // Check existence
+      const existingIdx = CART.findIndex(c => c.itemId === it.id && c.size === sizeName);
+      if (existingIdx > -1) {
+        CART[existingIdx].qty += 1;
+      } else {
+        CART.push({
+          id: 'c_' + Date.now() + Math.random(),
+          itemId: it.id,
+          name: it.name,
+          price: finalPrice,
+          size: sizeName,
+          qty: 1
+        });
+      }
+
+      localStorage.setItem('fd_cart', JSON.stringify(CART));
+      updateCartUI();
+      alert(it.name + ' added from ' + (it.rName || 'Restaurant'));
+    }
     function openCart() { document.getElementById('cart-drawer').style.display = 'block'; }
     function closeCart() { document.getElementById('cart-drawer').style.display = 'none'; }
 
@@ -1265,7 +1642,91 @@
     document.getElementById('year').textContent = new Date().getFullYear(); updateTopNav(); showLogin(); updateCartUI();
 
     // expose some functions for buttons created in HTML
-    window.showLogin = showLogin; window.showRegister = showRegister; window.showCustomer = showCustomer; window.showOwner = showOwner; window.showDelivery = showDelivery; window.showAdmin = showAdmin; window.showHistory = showHistory; window.showReviews = showReviews; window.openR = openR; window.cartAdd = cartAddWithQty; window.openCart = openCart; window.closeCart = closeCart; window.checkout = checkout; window.placeOrder = placeOrder; window.cancelCheckout = cancelCheckout; window.ownerAddItem = ownerAddItem; window.acceptDelivery = acceptDelivery; window.renderDeliveryRequests = renderDeliveryRequests; window.renderAdmin = renderAdmin; window.renderOwnerItems = renderOwnerItems; window.renderOwnerReviews = renderOwnerReviews; window.renderHistory = renderHistory; window.renderReviews = renderReviews; window.toggleReviewForm = toggleReviewForm; window.approveUser = approveUser; window.deleteUser = deleteUser;
+    window.showLogin = showLogin; window.showRegister = showRegister; window.showCustomer = showCustomer; window.showOwner = showOwner; window.showDelivery = showDelivery; window.showAdmin = showAdmin; window.showHistory = showHistory; window.showReviews = showReviews; window.openR = openR; window.cartAdd = cartAddWithQty; window.openCart = openCart; window.closeCart = closeCart; window.checkout = checkout; window.placeOrder = placeOrder; window.cancelCheckout = cancelCheckout; window.ownerAddItem = ownerAddItem; window.acceptDelivery = acceptDelivery; window.renderDeliveryRequests = renderDeliveryRequests; window.renderAdmin = renderAdmin; window.renderOwnerItems = renderOwnerItems; window.renderOwnerReviews = renderOwnerReviews; window.renderHistory = renderHistory; window.renderReviews = renderReviews; window.toggleReviewForm = toggleReviewForm; window.approveUser = approveUser; window.deleteUser = deleteUser; window.toggleNotifications = toggleNotifications; window.cartAddGlobal = cartAddGlobal;
+
+    // NOTIFICATION LOGIC
+    function getNotifications() {
+      const all = JSON.parse(localStorage.getItem(STORAGE.notifications) || '[]');
+      if (!currentUser) return [];
+      // Filter for current user (email) or their role (e.g. 'delivery')
+      return all.filter(n => n.target === currentUser.email || n.target === currentUser.role);
+    }
+
+    function pushNotification(target, text) {
+      const all = JSON.parse(localStorage.getItem(STORAGE.notifications) || '[]');
+      all.push({
+        id: 'n_' + Date.now() + Math.random(),
+        target: target,
+        text: text,
+        date: Date.now(),
+        read: false
+      });
+      localStorage.setItem(STORAGE.notifications, JSON.stringify(all));
+      updateNotificationUI();
+    }
+
+    function markAllRead() {
+      const all = JSON.parse(localStorage.getItem(STORAGE.notifications) || '[]');
+      if (!currentUser) return;
+      let changed = false;
+      all.forEach(n => {
+        if ((n.target === currentUser.email || n.target === currentUser.role) && !n.read) {
+          n.read = true;
+          changed = true;
+        }
+      });
+      if (changed) {
+        localStorage.setItem(STORAGE.notifications, JSON.stringify(all));
+        updateNotificationUI();
+      }
+    }
+
+    function toggleNotifications() {
+      const el = document.getElementById('notification-drawer');
+      const isHidden = el.style.display === 'none' || el.style.display === '';
+
+      if (isHidden) {
+        renderNotificationsInDrawer();
+        el.style.display = 'block';
+        // mark read after 1 second of viewing
+        setTimeout(markAllRead, 1000);
+      } else {
+        el.style.display = 'none';
+      }
+    }
+
+    function renderNotificationsInDrawer() {
+      const list = getNotifications().sort((a, b) => b.date - a.date);
+      const el = document.getElementById('notif-list');
+      el.innerHTML = '';
+      if (list.length === 0) {
+        el.innerHTML = '<div class="muted" style="padding:16px;text-align:center">No notifications</div>';
+        return;
+      }
+      list.forEach(n => {
+        const div = document.createElement('div');
+        div.className = `notif-item ${n.read ? '' : 'unread'}`;
+        div.innerHTML = `
+          <div style="font-weight:500;color:#334155">${n.text}</div>
+          <div class="notif-time">${new Date(n.date).toLocaleString()}</div>
+        `;
+        el.appendChild(div);
+      });
+    }
+
+    function updateNotificationUI() {
+      if (!currentUser) return;
+      const notifs = getNotifications();
+      const unreadCount = notifs.filter(n => !n.read).length;
+      const badge = document.getElementById('notif-badge');
+      if (badge) {
+        badge.innerText = unreadCount > 9 ? '9+' : unreadCount;
+        badge.style.display = unreadCount > 0 ? 'flex' : 'none';
+      }
+    }
+
+    // Check notifications periodically (auto-refresh for demo)
+    setInterval(updateNotificationUI, 3000);
 
     // wire up pay & confirm button and receipt download
     document.getElementById('pay-confirm-btn').addEventListener('click', function () {
